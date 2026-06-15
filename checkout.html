@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Sweet Mishpuchah — Checkout</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lato:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family:'Lato',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:#0f0b07;
+    color:#f9f5ee;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a { color:inherit; text-decoration:none; }
+
+  .page {
+    max-width:900px;
+    margin:0 auto;
+    padding:14px 14px 40px;
+  }
+
+  .top-bar {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:6px 4px 16px;
+  }
+
+  .brand-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.2rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+
+  .brand-sub {
+    font-size:0.8rem;
+    opacity:0.8;
+  }
+
+  .btn-ghost {
+    border-radius:999px;
+    border:1px solid rgba(249,245,238,0.22);
+    padding:7px 13px;
+    font-size:0.8rem;
+    background:rgba(15,11,7,0.7);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+  }
+
+  .section {
+    margin-top:10px;
+    border-radius:16px;
+    padding:16px 14px 18px;
+    background:linear-gradient(160deg,#1b120a 0%,#0b0704 100%);
+  }
+
+  .section-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.05rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#facc6b;
+    margin-bottom:10px;
+  }
+
+  .section-sub {
+    font-size:0.86rem;
+    color:rgba(249,245,238,0.78);
+    margin-bottom:10px;
+  }
+
+  .footer {
+    margin-top:26px;
+    padding-top:14px;
+    border-top:1px solid rgba(148,124,92,0.4);
+    font-size:0.78rem;
+    color:rgba(249,245,238,0.7);
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:space-between;
+  }
+
+  .footer a {
+    text-decoration:underline;
+    text-decoration-thickness:1px;
+    text-underline-offset:3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="top-bar">
+    <div>
+      <div class="brand-title">The Sweet Mishpuchah</div>
+      <div class="brand-sub">Secure checkout</div>
+    </div>
+    <button class="btn-ghost" onclick="goBackToMenu()">← Back to cakes</button>
+  </header>
+
+  <section class="section">
+    <h1 class="section-title">Checkout</h1>
+    <p class="section-sub">
+      Review your cart, choose a pickup date, enter your details, and confirm your order. Your cart is loaded from this device.
+    </p>
+
+    <!-- 🔻 Inline your full Checkout Mobile (Parts 1–5) here -->
+    <!-- Take everything between <body>...</body> from your checkout mobile file and paste it here. -->
+
+  </section>
+
+  <footer class="footer">
+    <div>Pickup: 2404 East 28th Street, Brooklyn, NY 11235</div>
+    <div>
+      Questions? Email
+      <a href="mailto:thesweetmishpuchah@gmail.com">thesweetmishpuchah@gmail.com</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  function goBackToMenu() {
+    window.location.href = 'index.html';
+  }
+</script>
+
+</body>
+</html>
