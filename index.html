@@ -641,7 +641,7 @@ createCakeElements(ribbonTrack);
 const clone = ribbonTrack.cloneNode(true);
 ribbonTrack.parentNode.appendChild(clone);
 
-clone.querySelectorAll(".cake-item").forEach((item, i) => {
+clone.querySelectorAll(".ribbon-item").forEach((item, i) => {
   const cake = cakes[i % cakes.length];
   item.addEventListener("click", () => openModal(cake), { passive:true });
 });
