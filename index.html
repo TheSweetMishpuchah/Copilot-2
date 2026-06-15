@@ -215,6 +215,29 @@
     .hero { padding-inline:14px; }
     .section { padding-inline:12px; }
   }
+ /* FORCE RIBBON SIZE — FIXES GIANT IMAGES ON GITHUB PAGES */
+.ribbon-container {
+    height: 140px;
+    overflow: hidden;
+}
+
+.ribbon-track {
+    height: 140px;
+}
+
+.ribbon-item {
+    flex: 0 0 auto;
+    height: 140px;
+    width: auto;
+}
+
+.ribbon-item img {
+    height: 140px !important;
+    width: auto !important;
+    object-fit: contain;
+    display: block;
+}
+
 </style>
 </head>
 <body>
