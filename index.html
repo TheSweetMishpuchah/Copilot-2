@@ -302,9 +302,461 @@
       Swipe through the ribbon, tap any cake to see photos, ingredients, sizes, and price, then add it to your cart.
     </p>
 
-    <!-- 🔻 Inline your full Ribbon Mobile (Parts 1–9) here -->
-    <!-- Take everything between <body>...</body> from your ribbon file and paste it here. -->
-    <!-- That includes its <style> and <script> blocks. -->
+   
+<!-- 🎀 Ribbon container -->
+<div class="ribbon">
+  <div class="ribbon-track" id="ribbonTrack"></div>
+</div>
+
+<!-- 📦 Modal popup -->
+<div class="modal" id="myModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+  <span class="close" id="closeModal" aria-label="Close">&times;</span>
+
+  <!-- 🖼️ Gallery -->
+  <div class="modal-gallery">
+    <button class="gallery-prev" aria-label="Previous image">&#10094;</button>
+    <img id="galleryImg" src="" alt="Cake variation">
+    <button class="gallery-next" aria-label="Next image">&#10095;</button>
+  </div>
+
+  <!-- 📑 Info -->
+  <div class="modal-info">
+    <h2 id="modalTitle"></h2>
+
+    <p><strong>Description:</strong><br>
+      <span id="modalDesc"></span>
+    </p>
+
+    <p><strong>Ingredients:</strong><br>
+      <span id="modalIngredients"></span>
+    </p>
+
+    <p><strong>Size:</strong>
+      <span id="modalDiameter"></span>
+    </p>
+
+    <p><strong>Serves:</strong>
+      <span id="modalServingsize"></span>
+    </p>
+
+    <p><strong>Price:</strong>
+      <span id="modalPrice"></span>
+    </p>
+
+    <!-- 🛒 Add-to-cart -->
+    <div style="margin-top:12px;">
+      <button id="addToCartBtn" class="add-to-cart"></button>
+      <span id="addedMessage" class="added-message"></span>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* 🍰 MASTER LIST OF CAKES — used to build the ribbon.
+   Keep names exactly matching keys in galleriesByCakeName for best results. */
+const cakes = [
+  { name:"Medovik", img:"https://i.imgur.com/Q62En7b.jpeg", desc:"The Medovik cake is a layered honey cake made from thin, tender biscuit-like layers infused with honey, stacked with a tangy-sweet cream filling (traditionally sour cream or a mix of sour cream and whipped cream). Over time, the layers soften, creating a melt‑in‑the‑mouth texture.", ingredients:"flour, eggs, sugar, butter, honey, baking soda, sour cream or sour cream with whipped cream, condensed milk or butter.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"medovik" },
+
+  { name:"Milky Girl", img:"https://i.imgur.com/JQ2VrsG.jpeg", desc:"The Milky Girl cake is built from whisper‑thin layers made with condensed milk, each sheet carrying a gentle caramelized sweetness. These layers are joined by a smooth, cloud‑like cream that keeps the structure light rather than heavy. As the cake settles, the flavors harmonize into a tender balance of dairy richness and airy delicacy, offering a soft bite that feels both comforting and refined.", ingredients:"sweetened condensed milk, eggs, flour, baking powder, cream cheese, heavy cream, powdered sugar, vanilla.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"milky-girl" },
+
+  { name:"Kievsky", img:"https://i.imgur.com/yfmbrjQ.jpeg", desc:"The Kievsky cake is a nutty meringue-based delight made with airy layers of hazelnut and cashew meringue, filled with rich buttercream and various glazes based on the flavor chosen, which creates a crisp-yet-creamy texture that balances sweetness with a subtle nutty crunch.", ingredients:"egg whites, sugar, hazelnuts and cashews, flour, vanilla, butter, cocoa powder, brandy or rum.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"kievsky" },
+
+  { name:"Sweet Fantasy Cake", img:"https://i.imgur.com/FFYsxQ1.jpeg", desc:"The Sweet Fantasy cake is composed of crisp yet delicate sheets of baked meringue, each one light as air and faintly sweet. Between the layers rests a smooth cream—often whipped or custard‑based—that softens the meringue just enough to create a gentle contrast of textures. As the cake settles, the crisp edges mellow into a tender bite, yielding a dessert that balances cloud‑like fragility with creamy richness, leaving a finish that is both elegant and comforting.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, whipped cream, vanilla.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$80", id:"sweet-fantasy-cake" },
+
+  { name:"Lemon Cake", img:"https://i.imgur.com/wSOuJb4.jpeg", desc:"The Lemon cake is a bright, refreshing dessert built on soft, moist layers infused with the zest and juice of fresh lemons. Each tier carries a gentle citrus tang that is balanced by a smooth, lightly sweet cream or glaze, often enriched with butter or mascarpone. As the flavors settle, the cake develops a lively harmony of tartness and sweetness, offering a tender crumb and a clean, invigorating finish that lingers pleasantly on the palate.", ingredients:"flour, sugar, butter, eggs, lemon zest, lemon juice, baking powder, milk, vanilla.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"lemon-cake" },
+
+  { name:"Esterházy Torte", img:"https://i.imgur.com/aUcKPRw.jpg", desc:"The Esterházy Torte is a refined Hungarian classic composed of multiple thin layers of nut‑based sponge, traditionally made with ground walnuts or almonds. Each sheet is joined by a silky buttercream enriched with vanilla or cognac, creating a luxurious depth of flavor. The cake is crowned with its signature glazed top, often adorned with a delicate spider‑web pattern of chocolate over fondant. As the layers rest together, the nutty richness and smooth cream meld into a balanced, elegant texture that is both tender and indulgent, making it a centerpiece of Central European pastry tradition.", ingredients:"egg whites, sugar, ground hazelnuts and almonds, flour, butter, egg yolks, milk, vanilla, kirsch or rum, apricot jam.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"esterházy-torte" },
+
+  { name:"Bird's Milk Cake", img:"https://i.imgur.com/02S6jom.jpg", desc:"The Bird's Milk cake is a confection of airy elegance, built on a base of tender sponge topped with a light, soufflé‑like filling made from whipped egg whites and sweetened condensed milk. This delicate cream is stabilized to hold its cloud‑soft texture, then cloaked in a smooth chocolate glaze that adds a gentle snap with each bite. The contrast between the fluffy interior and glossy coating creates a refined balance—ethereal sweetness wrapped in a crisp finish—that has made it an iconic and beloved dessert.", ingredients:"eggs, sugar, flour, butter, milk, gelatin, sour cream, sweetened condensed milk, vanilla, chocolate, heavy cream.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"bird's-milk-cake" },
+
+  { name:"Cheesecake", img:"https://i.imgur.com/Bcb0k7J.jpeg", desc:"The Cheesecake is a classic indulgence, built on a crisp, buttery crust that supports a smooth, velvety filling made from cream cheese, eggs, and sugar. Baked gently to achieve a tender, custard‑like texture, it balances rich creaminess with a subtle tang. Often finished with a glossy fruit topping, chocolate drizzle, or left plain for elegance, each slice offers a harmonious blend of dense yet delicate flavor. The result is a dessert that feels both luxurious and comforting, melting slowly on the palate with every bite.", ingredients:"cream cheese, sugar, eggs, vanilla, salt.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$60", id:"cheesecake" },
+
+  //{ name:"Chocolate Cheesecake", ... } // variation handled via galleriesByCakeName
+  { name:"Homestyle Fluffy Cake", img:"https://i.imgur.com/NliZ81m.jpeg", desc:"The Fluffy cake, whose name means “Tenderness,” is a light and graceful creation built from airy sponge layers paired with a delicate cream. Often enriched with condensed milk or whipped cream, the filling lends a gentle sweetness that enhances the cake’s soft, melt‑away texture. Finished with a subtle dusting or glaze, it embodies a balance of simplicity and refinement—an elegant dessert that lives up to its name by offering a tender, almost ethereal bite.", ingredients:"eggs, sugar, flour, sour cream, butter, baking soda or baking powder, vanilla.", diameter: "15″ x 11″.", servingsize:"about 20 people.", price:"$100", id:"fluffy-cake" },
+
+  { name:"Pavlova", img:"https://i.imgur.com/7XExzfo.jpeg", desc:"The Pavlova cake is a showpiece of airy elegance, crafted from a crisp meringue shell with a marshmallow‑soft center. Its delicate base is crowned with billows of whipped cream and a vibrant array of fresh fruit—often berries or slices of kiwi—that add a refreshing burst of color and flavor. The contrast between the brittle exterior, the tender interior, and the juicy topping creates a harmonious balance of textures, making each bite both light and indulgent, a dessert that feels celebratory and refined.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, vanilla, heavy cream.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"pavlova" },
+
+  { name:"Gingerbread Cake", img:"https://i.imgur.com/yRmHQde.jpeg", desc:"The Gingerbread cake is a traditional gingerbread‑style treat, originating from the city of Tula and cherished for its rich, spiced character. It is crafted from a dense, honey‑based dough infused with warm notes of spice, then filled with a layer of jam—often berry or fruit preserves—that adds a gentle tartness to balance the sweetness. Pressed into ornate molds, the cake emerges with a decorative imprint on its surface, giving it both visual charm and cultural identity. With its firm yet tender bite and fragrant flavor, the Gingerbread cake embodies the warmth of festive baking and the artistry of centuries‑old tradition.", ingredients:"flour, honey, sugar, eggs, water, rye flour, spices, jam or condensed milk filling.", diameter: "", servingsize:"15-20 people.", price:"$60", id:"gingerbread-cake" },
+
+  { name:"Royal Ruins Cake", img:"https://i.imgur.com/emjcPSn.jpeg", desc:"The Royal Ruins cake is a playful yet indulgent dessert, assembled from crumbled sponge or biscuit pieces layered with a rich cream, often made from sour cream or condensed milk. Its name reflects the rustic, “ruined” appearance—an intentionally uneven structure where broken cake fragments are bound together by the smooth filling. As it rests, the cream permeates the crumbs, softening them into a tender, melt‑away texture. The result is a cake that feels both casual and luxurious, with a balance of creamy sweetness and light sponge that turns imperfection into charm.", ingredients:"eggs, sugar, flour, sour cream, butter, cocoa powder, vanilla.", diameter: "11″ x 9″.", servingsize:"15-20 people.", price:"$100", id:"royal-ruins-cake" },
+
+  { name:"Kings Cake", img:"https://i.imgur.com/paaH7xO.jpeg", desc:"The Kings cake is a sumptuous, celebratory dessert built from rich short crust layers often flavored with meringue cream. Traditionally adorned with fresh strawberries, kiwis, peach, or apricot which contribute to the regal appearance that matches its name. As the cake rests, the flavors meld into a harmonious balance of tender crumb and smooth filling, creating a dessert that feels both indulgent and majestic.", ingredients:"eggs, sugar, flour, butter, vanilla.", diameter: "11″ x 9″.", servingsize:"10-15 people.", price:"$100", id:"kings-cake" },
+
+  { name:"Apple Pie", img:"https://i.imgur.com/HGEFjNa.jpeg", desc:"The Apple Pie is a timeless classic, crafted with a buttery, flaky crust that cradles a filling of tender apples gently spiced with cinnamon and nutmeg. As it bakes, the fruit softens into a luscious, golden interior, releasing a warm aroma that embodies comfort. The contrast between the crisp pastry and the juicy, caramelized apples creates a balanced sweetness, while each slice offers a nostalgic taste of home—simple, hearty, and endlessly inviting.", ingredients:"apples, sugar, brown sugar, flour, butter, cinnamon, nutmeg, salt, lemon juice, eggs, pie crust.", diameter: "10 inches.", servingsize:"10-12 people.", price:"$40", id:"apple-pie" },
+
+  { name:"Pear Pie", img:"https://i.imgur.com/uJoT5DF.jpeg", desc:"The Pear Pie is a gentle, fruit‑forward dessert that pairs a buttery, flaky crust with slices of ripe pears baked to tender perfection. The filling of almond butter carries a natural sweetness, often lifted with a hint of vanilla or warm spice, allowing the pears’ delicate flavor to shine. As it bakes, the fruit softens into a luscious, golden interior, while the crust provides a crisp contrast. The result is a pie that feels both comforting and refined, offering a mellow, juicy bite with a subtle elegance that lingers pleasantly.", ingredients:"pears, sugar, brown sugar, wheat flour, almond flour, butter, cinnamon, nutmeg, salt, lemon juice, eggs, pie crust.", diameter: "10 inches.", servingsize:"10-12 people.", price:"$50", id:"pear-pie" },
+
+  { name:"Pineapple Upside-Down Cake", img:"https://i.imgur.com/XUOfb5M.jpeg", desc:"The Pineapple Upside‑Down cake is a vibrant classic, baked with rings of golden pineapple and bright cherries nestled at the bottom of the pan, then revealed as a caramelized crown when inverted. Beneath this glossy, fruit‑laden topping lies a tender, buttery sponge that absorbs the juices, creating a moist crumb infused with tropical sweetness. The contrast of caramelized fruit and soft cake delivers a lively balance of flavors, making each slice both nostalgic and refreshingly bright.", ingredients:"pineapple rings, maraschino cherries, brown sugar, butter, flour, sugar, eggs, milk, salt.", diameter: "11″ x 9″.", servingsize:"15-20 people.", price:"$60", id:"pineapple-upside-down-cake"},
+
+  { name:"Meringue Roulette", img:"https://i.imgur.com/f6rPzgP.jpeg", desc:"The Meringue Roulette cake is a striking dessert built from spiraled layers of crisp meringue and velvety cream, arranged to create a roulade‑like form. Each slice reveals a swirl of airy sweetness balanced by the smooth richness of the filling, often accented with fruit or chocolate for added depth. The meringue’s delicate crunch gives way to a tender, melt‑in‑the‑mouth interior, while the roulette shape adds a playful elegance. The result is a cake that feels both light and indulgent, offering a harmonious blend of texture and flavor in every roll.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, vanilla, whipped cream.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"meringue-roulette" },
+
+  { name:"Sponge Roulette", img:"https://i.imgur.com/uno3x1l.png", desc:"The Sponge Roulette cake is made from a soft, airy sponge sheet rolled around a smooth cream filling. The sponge, often flavored with vanilla or cocoa, provides a tender base that contrasts with the richness of the cream, which may be accented by fruit preserves or chocolate. When sliced, each piece reveals a graceful spiral of cake and filling, offering both visual charm and balanced flavor. The result is a dessert that feels playful yet refined, combining delicate texture with a satisfying sweetness in every roll.", ingredients:"eggs, sugar, flour, vanilla, whipped cream, fruit or jam.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"sponge-roulette" },
+
+  { name:"Forest Glade (Sponge Roulette)", img:"https://i.imgur.com/PeXuaZN.jpg", desc:"The Forest Glade (Sponge Roulette) is crafted from a soft, airy sponge sheet rolled around a luscious blend of whipped cream and mascarpone, creating a filling that’s both light and indulgent. The sponge, typically infused with vanilla or cocoa, offers a tender contrast to the creamy interior, which is studded with bursts of fresh berries for a bright, tangy lift. A smooth chocolate cream coating envelops the roll, adding a touch of elegance and depth to its presentation. When sliced, each piece reveals a graceful spiral of sponge, cream, and fruit, making it as visually enchanting as it is flavorful. The result is a dessert that feels vibrant and refined, balancing delicate texture with rich sweetness and a hint of woodland charm.", ingredients:"eggs, sugar, flour, vanilla, whipped cream, mascarpone, berries.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"forest-glade-sponge-roulette" },
+
+  { name:"Pecan Pound Cake", img:"https://i.imgur.com/gY9VFUX.jpeg", desc:"The Pecan Pound cake is made from a simple yet flavorful blend of honey, flour, sour cream, eggs, sugar, baking soda, and black tea, with chopped pecans folded into the batter for added texture. The tea lends a subtle depth, while the honey and sour cream create a moist, tender crumb that rises into a golden, rustic loaf. With no filling or frosting, the cake celebrates its natural ingredients, offering a pure, comforting sweetness and a gentle nuttiness in every bite. Each slice reveals a soft, speckled interior, making it a quietly elegant dessert that feels both wholesome and refined.", ingredients:"honey, eggs, sugar, flour, sour cream, baking soda, and black tea.", diameter: "11″ x 9″.", servingsize:"12-15 people.", price:"$60", id:"pecan-pound-cake" },
+
+  { name:"Strawberry Charlotte Cake", img:"https://i.imgur.com/JztsnwL.jpeg", desc:"The Strawberry Charlotte is a mousse cake. It's made with moist ladyfingers that line the pan, creating a delicate shell filled with Bavarian cream which is mixed with a strawberry mousse. The mousse captures the bright sweetness of fresh berries while maintaining a refreshing, cloud‑like texture. As the cake sets, the ladyfingers gently absorb the fruit essence, becoming tender without losing their structure. With no heavy frosting or elaborate decoration, the Charlotte highlights the purity of its ingredients, offering a clean, elegant flavor that feels both nostalgic and refined. Each slice reveals a graceful contrast between the pale biscuit exterior and the rosy mousse within, making it a dessert that feels celebratory yet effortlessly delicate.", ingredients:"flour, eggs, milk, vanilla, heavy cream, sugar, strawberries, and gelatine.", diameter: "10 inches.", servingsize:"15-20 people.", price:"$100", id:"strawberry-charlotte-cake" },
+
+  { name:"The Fairytale Cake", img:"https://i.imgur.com/LBeJQOj.jpeg", desc:"The Fairytale cake is made up of soft, moist sponge layers that are generously coated in custard cream, creating a tender base that feels both comforting and luxurious. Alternating layers of mixed berry jam add a bright, fruity contrast, as their sweet‑tart flavor soakes gently into the sponge while the cake rests. The custard lends a smooth richness that balances the liveliness of the berries, allowing each bite to feel harmonious and delicately sweet. With no heavy decorations or elaborate fillings, the cake highlights the purity of its components, offering a nostalgic charm that feels timeless and refined. When sliced, every piece reveals a beautiful interplay of pale sponge, creamy custard, and jewel‑toned jam, making it a dessert that feels magical in its simplicity.", ingredients:"flour, eggs, milk, vanilla, sugar, mixed berry jam.", diameter: "10 inches.", servingsize:"12-15 people.", price:"$100", id:"the-fairytale-cake" },
+
+  { name:"Napoleon Cake", img:"https://i.imgur.com/gKg1nF7.jpeg", desc:"The Napoleon cake is crafted from multiple thin, flaky pastry layers that are baked until crisp and golden, then generously coated with smooth, velvety custard cream. As the cake rests, the pastry softens slightly, absorbing the cream and creating a delicate balance between tender and crisp textures. The custard brings a gentle sweetness and a rich, comforting depth, allowing each bite to feel both luxurious and familiar. With no heavy toppings or elaborate decorations, the cake highlights the purity of its components, offering a nostalgic flavor that feels timeless and refined. When sliced, every piece reveals its signature stack of pale pastry and creamy filling, making it a dessert that feels elegant in its simplicity and endlessly satisfying.", ingredients:"flour, eggs, sugar, butter and milk.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"napoleon-cake" },
+
+  { name:"Drunken Cherry Cake", img:"https://i.imgur.com/rfLUhEQ.png", desc:"The Drunken Cherry cake is imbued with tart cherries soaked in cognac, allowing the cake to develop a deep, aromatic sweetness. Inside a smooth cream filling embraces pieces of tender, cognac‑infused cherries which creates a balance of richness and bright fruit flavor. As the cake rests, the cherries release their juices into the cake, giving every bite a harmonious blend of tartness and warmth. With no heavy decorations or elaborate toppings, the cake highlights the natural beauty of its ingredients, offering a nostalgic charm that feels both indulgent and refined. When sliced, each piece reveals a striking contrast creamy filling, and ruby‑toned cherries, making it a dessert that feels celebratory, comforting, and irresistibly inviting.", ingredients:"flour, eggs, sugar, butter, condensed milk, cocoa powder, sour cherries, cognac.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"drunken-cherry-cake" },
+
+  { name:"Cream Puffs", img:"https://i.imgur.com/Et4QqLT.jpeg", desc:"Cream puffs are made from delicate choux pastry that bakes into light, hollow shells with a crisp golden exterior and a tender, airy interior. Once cooled, each shell is filled with smooth, velvety custard or whipped cream that adds a gentle sweetness and a luxurious softness to every bite. As the pastry rests, the cream settles into the folds of the shell, creating a perfect balance between crisp and creamy textures. When served, each puff reveals its simple beauty—golden pastry, pale cream, and a cloud‑like lightness that makes them irresistible in their simplicity.", ingredients:"flour, eggs, sugar, butter, milk (Can be ordered with either custard or whipped cream)", diameter: "", servingsize:"Comes in a pack of 10.", price:"$40", id:"cream-puffs" },
+
+  { name:"Kartoshka", img:"https://i.imgur.com/hRNJpo3.jpeg", desc:"Kartoshka is a pastry known for its rich, truffle-like texture and playful shape that resembles a small potato. Traditionally made from crumbled sponge cake or biscuit mixed with sweetened condensed milk, butter, and cocoa, the mixture is rolled into compact logs or ovals and coated in chocolate glaze. Each piece is often topped with a few pistachios or nuts for contrast and elegance. Despite its humble origins, kartoshka delivers a deeply satisfying bite: dense, chocolaty, and smooth, with a hint of crunch from the garnish. It’s a beloved treat that blends simplicity with indulgence, perfect for tea time or a sweet finish to any meal.", ingredients:"flour, eggs, sugar, butter, milk, condensed milk, cocoa powder, cognac.", diameter: "", servingsize:"Comes in a pack of 10.", price:"$45", id:"kartoshka" },
+
+  { name:"Polar Bear Cake", img:"https://i.imgur.com/crPL5IR.jpeg", desc:"The Polar Bear Cake is a rich vanilla and chocolate layered cake with a chocolaty gold finish. Tender cocoa sponge made from flour, butter, sugar, and sour cream creates a moist, velvety crumb with a gentle tang that deepens the chocolate flavor. The vanilla layer is light and delicate with a soft, plush crumb, offering a mellow sweetness and a subtle warmth that balances richness with an airy, melt-in-your-mouth finish. Each layer is generously filled with a whipped mascarpone and heavy cream frosting, lightly sweetened with powdered sugar for a soft, cloudlike texture that melts on the tongue. A silky chocolate element weaves through the cake, adding depth and a subtly sweet flavor. As it rests, the cream filling settles into the sponge, keeping every bite luscious without feeling heavy. Cloaked in a pale swirl of mascarpone frosting and finished with delicate chocolate accents, the cake evokes the quiet elegance of fresh snowfall - simple, refined, and irresistibly comforting with every slice.", ingredients:"flour, sour cream, sugar, butter, cocoa powder, heavy cream, mascarpone, powdered sugar, chocolate.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"polar-bear-cake" },
+
+  { name:"Baklava", img:"https://i.imgur.com/JMtJu2p.jpeg", desc:"Baklava is a delicate, honey‑soaked pastry built from dozens of crisp, buttery phyllo layers. Inside, a warm blend of finely chopped walnuts and pistachios adds gentle richness, lifted by a hint of cinnamon. Once baked to a golden crackle, the pastry is drenched in a fragrant honey‑citrus syrup that seeps into the layers, giving each bite a bright, aromatic sweetness. The top stays lightly crisp while the center becomes tender and nutty, creating a beautiful contrast in texture. Finished with a sprinkle of crushed pistachios, baklava feels both timeless and indulgent—simple, fragrant, and irresistibly satisfying.", ingredients:"Phyllo dough, melted butter, walnuts, pistachios, sugar, cinnamon, honey, water, lemon juice, and a touch of orange zest.", diameter: "", servingsize:"Comes in a pack of 10.", price:"$40", id:"baklava" },
+
+  { name:"Zefir", img:"https://i.imgur.com/oH0POqa.jpeg", desc:"Zefir is a light, fruit‑whipped confection with a soft, cloudlike texture and a gentle natural sweetness. Made from puréed apples or berries blended with sugar and whipped egg whites, it’s piped into airy spirals that set into a delicate shell. The outside stays lightly firm while the inside remains tender and melt‑soft, offering a clean, bright flavor with a subtle tang. Finished with a dusting of powdered sugar, Zefir feels simple, elegant, and effortlessly comforting.", ingredients:"Egg whites, sugar syrup, and berries.", diameter: "", servingsize:"Comes in a pack of 12.", price:"$10", id:"zefir" },
+];
+
+/* 🖼️ VARIATIONS BY CAKE NAME — each variation can have its own desc/ingredients/price.
+   If a cake isn’t listed here, it will default to its master info from `cakes`. */
+const galleriesByCakeName = {
+  "Medovik": [
+    { img:"https://i.imgur.com/Q62En7b.jpeg", desc:"The Medovik Cake is a layered honey cake made from thin, tender biscuit-like layers infused with honey, stacked with a tangy-sweet cream filling (traditionally sour cream or a mix of sour cream and whipped cream). Over time, the layers soften, creating a melt‑in‑the‑mouth texture.", ingredients:"flour, eggs, sugar, butter, honey, baking soda, sour cream or sour cream with whipped cream, condensed milk or butter.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"medovik" },
+    { img:"https://i.imgur.com/jE6fRsM.png", desc:"The Chocolate Glazed Medovik Cake is a layered honey cake made from thin, tender biscuit-like layers infused with honey, stacked with a sour cream based filling. Over time, the layers soften, creating a melt‑in‑the‑mouth chocolaty texture.", ingredients:"flour, eggs, sugar, butter, honey, baking soda, sour cream, and butter.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"chocolate-glazed-medovik" },
+    { img:"https://i.imgur.com/Fw9OD9I.jpeg", desc:"The Brown Medovik Cake is a layered honey cake made from thin, tender biscuit-like layers infused with honey, stacked with a sour cream based filling. Over time, the layers soften, creating a melt‑in‑the‑mouth chocolaty texture.", ingredients:"flour, eggs, sugar, butter, honey, baking soda, sour cream, and butter.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"brown-medovik" },
+  ],
+
+  "Milky Girl": [
+    { img:"https://i.imgur.com/JQ2VrsG.jpeg", desc:"The Milky Girl cake is built from whisper‑thin layers made with condensed milk, each sheet carrying a gentle caramelized sweetness. These layers are joined by a smooth, cloud‑like cream that keeps the structure light rather than heavy. As the cake settles, the flavors harmonize into a tender balance of dairy richness and airy delicacy, offering a soft bite that feels both comforting and refined.", ingredients:"sweetened condensed milk, eggs, flour, baking powder, cream cheese, heavy cream, powdered sugar, vanilla, and raspberry jam.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"milky-girl" },
+    { img:"https://i.imgur.com/cI8qy21.jpeg", desc:"The Milky Girl cake is built from whisper‑thin layers made with condensed milk, each sheet carrying a gentle caramelized sweetness. These layers are joined by a smooth, cloud‑like cream that keeps the structure light rather than heavy. As the cake settles, the flavors harmonize into a tender balance of dairy richness and airy delicacy, offering a soft bite that feels both comforting and refined.", ingredients:"sweetened condensed milk, eggs, flour, baking powder, cream cheese, heavy cream, powdered sugar, vanilla, and raspberry jam.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"milky-girl" },
+    { img:"https://i.imgur.com/oGNwVpp.jpeg", desc:"The Milky Girl cake is built from whisper‑thin layers made with condensed milk, each sheet carrying a gentle caramelized sweetness. These layers are joined by a smooth, cloud‑like cream that keeps the structure light rather than heavy. As the cake settles, the flavors harmonize into a tender balance of dairy richness and airy delicacy, offering a soft bite that feels both comforting and refined.", ingredients:"sweetened condensed milk, eggs, flour, baking powder, cream cheese, heavy cream, powdered sugar, vanilla, and raspberry jam.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"milky-girl" },
+    { img:"https://i.imgur.com/uRe68BU.jpeg", desc:"The Milky Girl cake is built from whisper‑thin layers made with condensed milk, each sheet carrying a gentle caramelized sweetness. These layers are joined by a smooth, cloud‑like cream that keeps the structure light rather than heavy. As the cake settles, the flavors harmonize into a tender balance of dairy richness and airy delicacy, offering a soft bite that feels both comforting and refined.", ingredients:"sweetened condensed milk, eggs, flour, baking powder, cream cheese, heavy cream, powdered sugar, vanilla, and raspberry jam.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"milky-girl" },
+  ],
+
+  "Kievsky": [
+    { img:"https://i.imgur.com/yfmbrjQ.jpeg", desc:"The Kievsky cake is a nutty meringue-based delight made with airy layers of hazelnut and cashew meringue, filled with rich buttercream and various glazes based on the flavor chosen, which creates a crisp-yet-creamy texture that balances sweetness with a subtle nutty crunch.", ingredients:"egg whites, sugar, hazelnuts and cashews, flour, vanilla, butter, cocoa powder, brandy or rum.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"kievsky" },
+    { img:"https://i.imgur.com/5V32uE1.jpeg", desc:"The Kievsky cake is a nutty meringue-based delight made with airy layers of hazelnut and cashew meringue, filled with rich buttercream and various glazes based on the flavor chosen, which creates a crisp-yet-creamy texture that balances sweetness with a subtle nutty crunch.", ingredients:"egg whites, sugar, hazelnuts and cashews, flour, vanilla, butter, cocoa powder, brandy or rum.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"kievsky" },
+    { img:"https://i.imgur.com/juvBCNo.jpeg", desc:"The Kievsky cake is a nutty meringue-based delight made with airy layers of hazelnut and cashew meringue, filled with rich buttercream and various glazes based on the flavor chosen, which creates a crisp-yet-creamy texture that balances sweetness with a subtle nutty crunch.", ingredients:"egg whites, sugar, hazelnuts and cashews, flour, vanilla, butter, cocoa powder, brandy or rum.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"kievsky" },
+    { img:"https://i.imgur.com/eTpEFlL.png", desc:"The Kievsky cake is a nutty meringue-based delight made with airy layers of hazelnut and cashew meringue, filled with rich buttercream and various glazes based on the flavor chosen, which creates a crisp-yet-creamy texture that balances sweetness with a subtle nutty crunch.", ingredients:"egg whites, sugar, hazelnuts and cashews, flour, vanilla, butter, cocoa powder, brandy or rum.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"kievsky" },
+  ],
+
+  "Sweet Fantasy Cake": [
+    { img:"https://i.imgur.com/FFYsxQ1.jpeg", desc:"The Sweet Fantasy cake is composed of crisp yet delicate sheets of baked meringue, each one light as air and faintly sweet. Between the layers rests a smooth cream—often whipped or custard‑based—that softens the meringue just enough to create a gentle contrast of textures. As the cake settles, the crisp edges mellow into a tender bite, yielding a dessert that balances cloud‑like fragility with creamy richness, leaving a finish that is both elegant and comforting.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, whipped cream, vanilla.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$80", id:"sweet-fantasy-cake"},
+    { img:"https://i.imgur.com/MXztmLI.jpeg", desc:"The Sweet Fantasy cake is composed of crisp yet delicate sheets of baked meringue, each one light as air and faintly sweet. Between the layers rests a smooth cream—often whipped or custard‑based—that softens the meringue just enough to create a gentle contrast of textures. As the cake settles, the crisp edges mellow into a tender bite, yielding a dessert that balances cloud‑like fragility with creamy richness, leaving a finish that is both elegant and comforting.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, whipped cream, vanilla.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$80", id:"sweet-fantasy-cake"},
+    { img:"https://i.imgur.com/6CaBeDP.jpeg", desc:"The Sweet Fantasy cake is composed of crisp yet delicate sheets of baked meringue, each one light as air and faintly sweet. Between the layers rests a smooth cream—often whipped or custard‑based—that softens the meringue just enough to create a gentle contrast of textures. As the cake settles, the crisp edges mellow into a tender bite, yielding a dessert that balances cloud‑like fragility with creamy richness, leaving a finish that is both elegant and comforting.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, whipped cream, vanilla.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$80", id:"sweet-fantasy-cake"},
+    { img:"https://i.imgur.com/Jy0hZUW.jpeg", desc:"The Sweet Fantasy cake is composed of crisp yet delicate sheets of baked meringue, each one light as air and faintly sweet. Between the layers rests a smooth cream—often whipped or custard‑based—that softens the meringue just enough to create a gentle contrast of textures. As the cake settles, the crisp edges mellow into a tender bite, yielding a dessert that balances cloud‑like fragility with creamy richness, leaving a finish that is both elegant and comforting.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, whipped cream, vanilla.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$80", id:"sweet-fantasy-cake"},
+  ],
+
+  "Esterházy Torte": [
+    { img:"https://i.imgur.com/aUcKPRw.jpg", desc:"The Esterházy Torte is a refined Hungarian classic composed of multiple thin layers of nut‑based sponge, traditionally made with ground walnuts or almonds. Each sheet is joined by a silky buttercream enriched with vanilla or cognac, creating a luxurious depth of flavor. The cake is crowned with its signature glazed top, often adorned with a delicate spider‑web pattern of chocolate over fondant. As the layers rest together, the nutty richness and smooth cream meld into a balanced, elegant texture that is both tender and indulgent, making it a centerpiece of Central European pastry tradition.", ingredients:"egg whites, sugar, ground hazelnuts and almonds, flour, butter, egg yolks, milk, vanilla, kirsch or rum, apricot jam.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"esterházy-torte"},
+    { img:"https://i.imgur.com/5UIvL7h.png", desc:"The Esterházy Torte is a refined Hungarian classic composed of multiple thin layers of nut‑based sponge, traditionally made with ground walnuts or almonds. Each sheet is joined by a silky buttercream enriched with vanilla or cognac, creating a luxurious depth of flavor. The cake is crowned with its signature glazed top, often adorned with a delicate spider‑web pattern of chocolate over fondant. As the layers rest together, the nutty richness and smooth cream meld into a balanced, elegant texture that is both tender and indulgent, making it a centerpiece of Central European pastry tradition.", ingredients:"egg whites, sugar, ground hazelnuts and almonds, flour, butter, egg yolks, milk, vanilla, kirsch or rum, apricot jam.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"esterházy-torte"},
+  ],
+
+  "Bird's Milk Cake": [
+    { img:"https://i.imgur.com/02S6jom.jpg", desc:"The Bird's Milk cake is a confection of airy elegance, built on a base of tender sponge topped with a light, soufflé‑like filling made from whipped egg whites and sweetened condensed milk. This delicate cream is stabilized to hold its cloud‑soft texture, then cloaked in a smooth chocolate glaze that adds a gentle snap with each bite. The contrast between the fluffy interior and glossy coating creates a refined balance—ethereal sweetness wrapped in a crisp finish—that has made it an iconic and beloved dessert.", ingredients:"eggs, sugar, flour, butter, milk, gelatin, sour cream, sweetened condensed milk, vanilla, chocolate, heavy cream.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"bird's-milk-cake"},
+    { img:"https://i.imgur.com/cMi7avs.png", desc:"The Bird's Milk cake is a confection of airy elegance, built on a base of tender sponge topped with a light, soufflé‑like filling made from whipped egg whites and sweetened condensed milk. This delicate cream is stabilized to hold its cloud‑soft texture, then cloaked in a smooth chocolate glaze that adds a gentle snap with each bite. The contrast between the fluffy interior and glossy coating creates a refined balance—ethereal sweetness wrapped in a crisp finish—that has made it an iconic and beloved dessert.", ingredients:"eggs, sugar, flour, butter, milk, gelatin, sour cream, sweetened condensed milk, vanilla, chocolate, heavy cream.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"bird's-milk-cake"},
+    { img:"https://i.imgur.com/IlbCyvE.jpeg", desc:"The Bird's Milk cake is a confection of airy elegance, built on a base of tender sponge topped with a light, soufflé‑like filling made from whipped egg whites and sweetened condensed milk. This delicate cream is stabilized to hold its cloud‑soft texture, then cloaked in a smooth chocolate glaze that adds a gentle snap with each bite. The contrast between the fluffy interior and glossy coating creates a refined balance—ethereal sweetness wrapped in a crisp finish—that has made it an iconic and beloved dessert.", ingredients:"eggs, sugar, flour, butter, milk, gelatin, sour cream, sweetened condensed milk, vanilla, chocolate, heavy cream.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"bird's-milk-cake"},
+    { img:"https://i.imgur.com/vqxHEX4.jpeg", desc:"The Bird's Milk cake is a confection of airy elegance, built on a base of tender sponge topped with a light, soufflé‑like filling made from whipped egg whites and sweetened condensed milk. This delicate cream is stabilized to hold its cloud‑soft texture, then cloaked in a smooth chocolate glaze that adds a gentle snap with each bite. The contrast between the fluffy interior and glossy coating creates a refined balance—ethereal sweetness wrapped in a crisp finish—that has made it an iconic and beloved dessert.", ingredients:"eggs, sugar, flour, butter, milk, gelatin, sour cream, sweetened condensed milk, vanilla, chocolate, heavy cream.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"bird's-milk-cake"},
+  ],
+  
+  "Gingerbread Cake": [
+    { img:"https://i.imgur.com/yRmHQde.jpeg", desc:"The Gingerbread cake is a traditional gingerbread‑style treat, originating from the city of Tula and cherished for its rich, spiced character. It is crafted from a dense, honey‑based dough infused with warm notes of spice, then filled with a layer of jam—often berry or fruit preserves—that adds a gentle tartness to balance the sweetness. Pressed into ornate molds, the cake emerges with a decorative imprint on its surface, giving it both visual charm and cultural identity. With its firm yet tender bite and fragrant flavor, the Gingerbread cake embodies the warmth of festive baking and the artistry of centuries‑old tradition.", ingredients:"flour, honey, sugar, eggs, water, rye flour, spices, jam or condensed milk filling.", servingsize:"15-20 people.", price:"$60", id:"gingerbread-cake" },
+    { img:"https://i.imgur.com/lhu9DBl.jpeg", desc:"The Gingerbread cake is a traditional gingerbread‑style treat, originating from the city of Tula and cherished for its rich, spiced character. It is crafted from a dense, honey‑based dough infused with warm notes of spice, then filled with a layer of jam—often berry or fruit preserves—that adds a gentle tartness to balance the sweetness. Pressed into ornate molds, the cake emerges with a decorative imprint on its surface, giving it both visual charm and cultural identity. With its firm yet tender bite and fragrant flavor, the Gingerbread cake embodies the warmth of festive baking and the artistry of centuries‑old tradition.", ingredients:"flour, honey, sugar, eggs, water, rye flour, spices, jam or condensed milk filling.", servingsize:"15-20 people.", price:"$60", id:"gingerbread-cake" },
+  ],
+
+  "Royal Ruins Cake": [
+    { img:"https://i.imgur.com/emjcPSn.jpeg", desc:"The Royal Ruins cake is a playful yet indulgent dessert, assembled from crumbled sponge or biscuit pieces layered with a rich cream, often made from sour cream or condensed milk. Its name reflects the rustic, “ruined” appearance—an intentionally uneven structure where broken cake fragments are bound together by the smooth filling. As it rests, the cream permeates the crumbs, softening them into a tender, melt‑away texture. The result is a cake that feels both casual and luxurious, with a balance of creamy sweetness and light sponge that turns imperfection into charm.", ingredients:"eggs, sugar, flour, sour cream, butter, cocoa powder, vanilla.", diameter: "11“ x 9“.", servingsize:"15-20 people.", price:"$100", id:"royal-ruins-cake" },
+    { img:"https://i.imgur.com/bWYxv0A.jpeg", desc:"The Royal Ruins cake is a playful yet indulgent dessert, assembled from crumbled sponge or biscuit pieces layered with a rich cream, often made from sour cream or condensed milk. Its name reflects the rustic, “ruined” appearance—an intentionally uneven structure where broken cake fragments are bound together by the smooth filling. As it rests, the cream permeates the crumbs, softening them into a tender, melt‑away texture. The result is a cake that feels both casual and luxurious, with a balance of creamy sweetness and light sponge that turns imperfection into charm.", ingredients:"eggs, sugar, flour, sour cream, butter, cocoa powder, vanilla.", diameter: "11“ x 9“.", servingsize:"15-20 people.", price:"$100", id:"royal-ruins-cake" },
+  ],
+
+  "Apple Pie": [
+    { img:"https://i.imgur.com/HGEFjNa.jpeg", desc:"The Apple Pie is a timeless classic, crafted with a buttery, flaky crust that cradles a filling of tender apples gently spiced with cinnamon and nutmeg. As it bakes, the fruit softens into a luscious, golden interior, releasing a warm aroma that embodies comfort. The contrast between the crisp pastry and the juicy, caramelized apples creates a balanced sweetness, while each slice offers a nostalgic taste of home—simple, hearty, and endlessly inviting.", ingredients:"apples, sugar, brown sugar, flour, butter, cinnamon, nutmeg, salt, lemon juice, eggs, pie crust.", diameter: "10 inches.", servingsize:"10-12 people.", price:"$40", id:"apple-pie" },
+    { img:"https://i.imgur.com/v38bo9q.jpeg", desc:"The Apple Pie is a timeless classic, crafted with a buttery, flaky crust that cradles a filling of tender apples gently spiced with cinnamon and nutmeg. As it bakes, the fruit softens into a luscious, golden interior, releasing a warm aroma that embodies comfort. The contrast between the crisp pastry and the juicy, caramelized apples creates a balanced sweetness, while each slice offers a nostalgic taste of home—simple, hearty, and endlessly inviting.", ingredients:"apples, sugar, brown sugar, flour, butter, cinnamon, nutmeg, salt, lemon juice, eggs, pie crust.", diameter: "10 inches.", servingsize:"10-12 people.", price:"$40", id:"apple-pie" },
+    { img:"https://i.imgur.com/j3fnjdo.jpeg", desc:"The Apple Pie is a timeless classic, crafted with a buttery, flaky crust that cradles a filling of tender apples gently spiced with cinnamon and nutmeg. As it bakes, the fruit softens into a luscious, golden interior, releasing a warm aroma that embodies comfort. The contrast between the crisp pastry and the juicy, caramelized apples creates a balanced sweetness, while each slice offers a nostalgic taste of home—simple, hearty, and endlessly inviting.", ingredients:"apples, sugar, brown sugar, flour, butter, cinnamon, nutmeg, salt, lemon juice, eggs, pie crust.", diameter: "10 inches.", servingsize:"10-12 people.", price:"$40", id:"apple-pie" },
+  ],
+
+  "Cheesecake": [
+    { img:"https://i.imgur.com/Bcb0k7J.jpeg", displayName: "Cheesecake", desc:"The Cheesecake is a classic indulgence, built on a crisp, buttery crust that supports a smooth, velvety filling made from cream cheese, eggs, and sugar. Baked gently to achieve a tender, custard‑like texture, it balances rich creaminess with a subtle tang. Often finished with a glossy fruit topping, chocolate drizzle, or left plain for elegance, each slice offers a harmonious blend of dense yet delicate flavor. The result is a dessert that feels both luxurious and comforting, melting slowly on the palate with every bite.", ingredients:"cream cheese, sugar, eggs, vanilla, salt.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$60", id:"cheesecake" },
+    { img:"https://i.imgur.com/8NlzG0M.jpeg", displayName: "Chocolate Cheesecake", desc:"The Chocolate Cheesecake is a decadent fusion of rich cream cheese and smooth chocolate, baked into a velvety, indulgent filling with a tender yet dense texture. Resting on a crisp cocoa or cookie‑crumb base, it offers a satisfying contrast between creamy depth and subtle crunch. Finished with a glossy ganache or dusting of cocoa, the cake harmonizes bittersweet chocolate notes with the tang of cheesecake, creating a luxurious dessert that melts slowly on the palate while leaving a lingering richness.", ingredients:"cream cheese, sugar, eggs, cocoa powder, chocolate, matzoh meal, butter, vanilla, sour cherries.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$60", id:"chocolate-cheesecake" },
+    { img:"https://i.imgur.com/nDKcLXH.png", displayName: "Sour Cherry Cheesecake", desc:"The Sour Cherry Cheesecake is a vibrant twist on tradition, anchored by a golden, crumbly crust that adds a satisfying crunch beneath its silky core. The filling, a blend of cream cheese, eggs, and sugar, is baked to a delicate, custard-like consistency, offering a rich mouthfeel with a gentle tang. Crowned with a ruby-red sour cherry compote, its glossy topping bursts with tartness that cuts through the creaminess, creating a dynamic contrast. Each bite delivers a balance of sweet and sour, dense and airy, making it both refreshing and indulgent. It’s a dessert that lingers on the tongue, equal parts bold and comforting.", ingredients:"cream cheese, sugar, eggs, butter, vanilla, sour cherries.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$60", id:"sour-cherry-cheesecake" },
+  ],
+
+  "Meringue Roulette": [
+    { img:"https://i.imgur.com/f6rPzgP.jpeg", desc:"The Meringue Roulette cake is a striking dessert built from spiraled layers of crisp meringue and velvety cream, arranged to create a roulade‑like form. Each slice reveals a swirl of airy sweetness balanced by the smooth richness of the filling, often accented with fruit or chocolate for added depth. The meringue’s delicate crunch gives way to a tender, melt‑in‑the‑mouth interior, while the roulette shape adds a playful elegance. The result is a cake that feels both light and indulgent, offering a harmonious blend of texture and flavor in every roll.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, vanilla, whipped cream.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"meringue-roulette" },
+    { img:"https://i.imgur.com/bRVyXxY.jpeg", desc:"The Meringue Roulette cake is a striking dessert built from spiraled layers of crisp meringue and velvety cream, arranged to create a roulade‑like form. Each slice reveals a swirl of airy sweetness balanced by the smooth richness of the filling, often accented with fruit or chocolate for added depth. The meringue’s delicate crunch gives way to a tender, melt‑in‑the‑mouth interior, while the roulette shape adds a playful elegance. The result is a cake that feels both light and indulgent, offering a harmonious blend of texture and flavor in every roll.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, vanilla, whipped cream.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"meringue-roulette" },
+    { img:"https://i.imgur.com/jx53Lkt.jpeg", desc:"The Meringue Roulette cake is a striking dessert built from spiraled layers of crisp meringue and velvety cream, arranged to create a roulade‑like form. Each slice reveals a swirl of airy sweetness balanced by the smooth richness of the filling, often accented with fruit or chocolate for added depth. The meringue’s delicate crunch gives way to a tender, melt‑in‑the‑mouth interior, while the roulette shape adds a playful elegance. The result is a cake that feels both light and indulgent, offering a harmonious blend of texture and flavor in every roll.", ingredients:"egg whites, sugar, cornstarch, vinegar or lemon juice, vanilla, whipped cream.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"meringue-roulette" },
+  ],
+
+  "Sponge Roulette": [
+    { img:"https://i.imgur.com/uno3x1l.png", desc:"The Sponge Roulette cake is made from a soft, airy sponge sheet rolled around a smooth cream filling. The sponge, often flavored with vanilla or cocoa, provides a tender base that contrasts with the richness of the cream, which may be accented by fruit preserves or chocolate. When sliced, each piece reveals a graceful spiral of cake and filling, offering both visual charm and balanced flavor. The result is a dessert that feels playful yet refined, combining delicate texture with a satisfying sweetness in every roll.", ingredients:"eggs, sugar, flour, vanilla, whipped cream, fruit or jam.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"sponge-roulette" },
+    { img:"https://i.imgur.com/ze2VNRm.jpeg", desc:"The Sponge Roulette cake is made from a soft, airy sponge sheet rolled around a smooth cream filling. The sponge, often flavored with vanilla or cocoa, provides a tender base that contrasts with the richness of the cream, which may be accented by fruit preserves or chocolate. When sliced, each piece reveals a graceful spiral of cake and filling, offering both visual charm and balanced flavor. The result is a dessert that feels playful yet refined, combining delicate texture with a satisfying sweetness in every roll.", ingredients:"eggs, sugar, flour, vanilla, whipped cream, fruit or jam.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"sponge-roulette" },
+    { img:"https://i.imgur.com/PeXuaZN.jpg", displayName: "Forest Glade (Sponge Roulette)", desc:"The Forest Glade (Sponge Roulette) is crafted from a soft, airy sponge sheet rolled around a luscious blend of whipped cream and mascarpone, creating a filling that’s both light and indulgent. The sponge, typically infused with vanilla or cocoa, offers a tender contrast to the creamy interior, which is studded with bursts of fresh berries for a bright, tangy lift. A smooth chocolate cream coating envelops the roll, adding a touch of elegance and depth to its presentation. When sliced, each piece reveals a graceful spiral of sponge, cream, and fruit, making it as visually enchanting as it is flavorful. The result is a dessert that feels vibrant and refined, balancing delicate texture with rich sweetness and a hint of woodland charm.", ingredients:"eggs, sugar, flour, vanilla, whipped cream, mascarpone, berries.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"forest-glade-sponge-roulette" },
+    { img:"https://i.imgur.com/h61yun5.jpeg", displayName: "Forest Glade (Sponge Roulette)", desc:"The Forest Glade (Sponge Roulette) is crafted from a soft, airy sponge sheet rolled around a luscious blend of whipped cream and mascarpone, creating a filling that’s both light and indulgent. The sponge, typically infused with vanilla or cocoa, offers a tender contrast to the creamy interior, which is studded with bursts of fresh berries for a bright, tangy lift. A smooth chocolate cream coating envelops the roll, adding a touch of elegance and depth to its presentation. When sliced, each piece reveals a graceful spiral of sponge, cream, and fruit, making it as visually enchanting as it is flavorful. The result is a dessert that feels vibrant and refined, balancing delicate texture with rich sweetness and a hint of woodland charm.", ingredients:"eggs, sugar, flour, vanilla, whipped cream, mascarpone, berries.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"forest-glade-sponge-roulette" },
+  ],
+
+  "Forest Glade (Sponge Roulette)": [
+    { img:"https://i.imgur.com/PeXuaZN.jpg", displayName: "Forest Glade (Sponge Roulette)", desc:"The Forest Glade (Sponge Roulette) is crafted from a soft, airy sponge sheet rolled around a luscious blend of whipped cream and mascarpone, creating a filling that’s both light and indulgent. The sponge, typically infused with vanilla or cocoa, offers a tender contrast to the creamy interior, which is studded with bursts of fresh berries for a bright, tangy lift. A smooth chocolate cream coating envelops the roll, adding a touch of elegance and depth to its presentation. When sliced, each piece reveals a graceful spiral of sponge, cream, and fruit, making it as visually enchanting as it is flavorful. The result is a dessert that feels vibrant and refined, balancing delicate texture with rich sweetness and a hint of woodland charm.", ingredients:"eggs, sugar, flour, vanilla, whipped cream, mascarpone, berries.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"forest-glade-sponge-roulette" },
+    { img:"https://i.imgur.com/h61yun5.jpeg", displayName: "Forest Glade (Sponge Roulette)", desc:"The Forest Glade (Sponge Roulette) is crafted from a soft, airy sponge sheet rolled around a luscious blend of whipped cream and mascarpone, creating a filling that’s both light and indulgent. The sponge, typically infused with vanilla or cocoa, offers a tender contrast to the creamy interior, which is studded with bursts of fresh berries for a bright, tangy lift. A smooth chocolate cream coating envelops the roll, adding a touch of elegance and depth to its presentation. When sliced, each piece reveals a graceful spiral of sponge, cream, and fruit, making it as visually enchanting as it is flavorful. The result is a dessert that feels vibrant and refined, balancing delicate texture with rich sweetness and a hint of woodland charm.", ingredients:"eggs, sugar, flour, vanilla, whipped cream, mascarpone, berries.", diameter: "12 inches.", servingsize:"10-12 people.", price:"$60", id:"forest-glade-sponge-roulette" },
+  ],
+
+  "Pecan Pound Cake": [
+    { img:"https://i.imgur.com/gY9VFUX.jpeg", desc:"The Pecan Pound cake is made from a simple yet flavorful blend of honey, flour, sour cream, eggs, sugar, baking soda, and black tea, with chopped pecans folded into the batter for added texture. The tea lends a subtle depth, while the honey and sour cream create a moist, tender crumb that rises into a golden, rustic loaf. With no filling or frosting, the cake celebrates its natural ingredients, offering a pure, comforting sweetness and a gentle nuttiness in every bite. Each slice reveals a soft, speckled interior, making it a quietly elegant dessert that feels both wholesome and refined.", ingredients:"honey, eggs, sugar, flour, sour cream, baking soda, and black tea.", diameter: "11″ x 9″.", servingsize:"12-15 people.", price:"$60", id:"pecan-pound-cake" },
+    { img:"https://i.imgur.com/tmgpyto.png", desc:"The Pecan Pound cake is made from a simple yet flavorful blend of honey, flour, sour cream, eggs, sugar, baking soda, and black tea, with chopped pecans folded into the batter for added texture. The tea lends a subtle depth, while the honey and sour cream create a moist, tender crumb that rises into a golden, rustic loaf. With no filling or frosting, the cake celebrates its natural ingredients, offering a pure, comforting sweetness and a gentle nuttiness in every bite. Each slice reveals a soft, speckled interior, making it a quietly elegant dessert that feels both wholesome and refined.", ingredients:"honey, eggs, sugar, flour, sour cream, baking soda, and black tea.", diameter: "11″ x 9″.", servingsize:"12-15 people.", price:"$60", id:"pecan-pound-cake" },
+    { img:"https://i.imgur.com/GnJXOel.png", desc:"The Pecan Pound cake is made from a simple yet flavorful blend of honey, flour, sour cream, eggs, sugar, baking soda, and black tea, with chopped pecans folded into the batter for added texture. The tea lends a subtle depth, while the honey and sour cream create a moist, tender crumb that rises into a golden, rustic loaf. With no filling or frosting, the cake celebrates its natural ingredients, offering a pure, comforting sweetness and a gentle nuttiness in every bite. Each slice reveals a soft, speckled interior, making it a quietly elegant dessert that feels both wholesome and refined.", ingredients:"honey, eggs, sugar, flour, sour cream, baking soda, and black tea.", diameter: "11″ x 9″.", servingsize:"12-15 people.", price:"$60", id:"pecan-pound-cake" },
+  ],
+
+  "Napoleon Cake": [
+    { img:"https://i.imgur.com/gKg1nF7.jpeg", desc:"The Napoleon cake is crafted from multiple thin, flaky pastry layers that are baked until crisp and golden, then generously coated with smooth, velvety custard cream. As the cake rests, the pastry softens slightly, absorbing the cream and creating a delicate balance between tender and crisp textures. The custard brings a gentle sweetness and a rich, comforting depth, allowing each bite to feel both luxurious and familiar. With no heavy toppings or elaborate decorations, the cake highlights the purity of its components, offering a nostalgic flavor that feels timeless and refined. When sliced, every piece reveals its signature stack of pale pastry and creamy filling, making it a dessert that feels elegant in its simplicity and endlessly satisfying.", ingredients:"flour, eggs, sugar, butter and milk.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"napoleon-cake" },
+    { img:"https://i.imgur.com/90jCtfl.jpeg", desc:"The Napoleon cake is crafted from multiple thin, flaky pastry layers that are baked until crisp and golden, then generously coated with smooth, velvety custard cream. As the cake rests, the pastry softens slightly, absorbing the cream and creating a delicate balance between tender and crisp textures. The custard brings a gentle sweetness and a rich, comforting depth, allowing each bite to feel both luxurious and familiar. With no heavy toppings or elaborate decorations, the cake highlights the purity of its components, offering a nostalgic flavor that feels timeless and refined. When sliced, every piece reveals its signature stack of pale pastry and creamy filling, making it a dessert that feels elegant in its simplicity and endlessly satisfying.", ingredients:"flour, eggs, sugar, butter and milk.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"napoleon-cake" },
+    { img:"https://i.imgur.com/qdVbQpv.jpeg", desc:"The Middle Eastern Napoleon cake is crafted from delicate, flaky pastry layers that are baked until crisp and golden, then generously filled with a silky charlotte custard cream infused with subtle regional sweetness. Between the pastry sheets, the cream softens the layers just enough to create a tender, melt‑in‑your‑mouth texture while still preserving the signature light crunch. A touch of honey or fragrant syrup adds a gentle floral note, echoing the flavors found in traditional Middle Eastern desserts. With no heavy toppings or elaborate decorations, the cake highlights the purity of its ingredients, offering a balanced sweetness that feels both comforting and refined. When sliced, each piece reveals its elegant stack of pastry and cream, making it a dessert that feels familiar yet beautifully enriched with a hint of regional character.", ingredients:"flour, eggs, sugar, butter, cognac, and milk.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"middle-eastern-napoleon-cake" },
+    { img:"https://i.imgur.com/7jQqWnm.jpeg", desc:"The Middle Eastern Napoleon cake is crafted from delicate, flaky pastry layers that are baked until crisp and golden, then generously filled with a silky charlotte custard cream infused with subtle regional sweetness. Between the pastry sheets, the cream softens the layers just enough to create a tender, melt‑in‑your‑mouth texture while still preserving the signature light crunch. A touch of honey or fragrant syrup adds a gentle floral note, echoing the flavors found in traditional Middle Eastern desserts. With no heavy toppings or elaborate decorations, the cake highlights the purity of its ingredients, offering a balanced sweetness that feels both comforting and refined. When sliced, each piece reveals its elegant stack of pastry and cream, making it a dessert that feels familiar yet beautifully enriched with a hint of regional character.", ingredients:"flour, eggs, sugar, butter, cognac, and milk.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"middle-eastern-napoleon-cake" },
+    { img:"https://i.imgur.com/FJPklKh.jpeg", desc:"The Middle Eastern Napoleon cake is crafted from delicate, flaky pastry layers that are baked until crisp and golden, then generously filled with a silky charlotte custard cream infused with subtle regional sweetness. Between the pastry sheets, the cream softens the layers just enough to create a tender, melt‑in‑your‑mouth texture while still preserving the signature light crunch. A touch of honey or fragrant syrup adds a gentle floral note, echoing the flavors found in traditional Middle Eastern desserts. With no heavy toppings or elaborate decorations, the cake highlights the purity of its ingredients, offering a balanced sweetness that feels both comforting and refined. When sliced, each piece reveals its elegant stack of pastry and cream, making it a dessert that feels familiar yet beautifully enriched with a hint of regional character.", ingredients:"flour, eggs, sugar, butter, cognac, and milk.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"middle-eastern-napoleon-cake" },
+  ],
+
+  "Strawberry Charlotte Cake": [
+    { img:"https://i.imgur.com/JztsnwL.jpeg", desc:"The Strawberry Charlotte is a mousse cake. It's made with moist ladyfingers that line the pan, creating a delicate shell filled with Bavarian cream which is mixed with a strawberry mousse. The mousse captures the bright sweetness of fresh berries while maintaining a refreshing, cloud‑like texture. As the cake sets, the ladyfingers gently absorb the fruit essence, becoming tender without losing their structure. With no heavy frosting or elaborate decoration, the Charlotte highlights the purity of its ingredients, offering a clean, elegant flavor that feels both nostalgic and refined. Each slice reveals a graceful contrast between the pale biscuit exterior and the rosy mousse within, making it a dessert that feels celebratory yet effortlessly delicate.", ingredients:"flour, eggs, milk, vanilla, heavy cream, sugar, strawberries, and gelatine.", diameter: "10 inches.", servingsize:"15-20 people.", price:"$100", id:"strawberry-charlotte-cake" },
+    { img:"https://i.imgur.com/6r0Fura.png", desc:"The Strawberry Charlotte is a mousse cake. It's made with moist ladyfingers that line the pan, creating a delicate shell filled with Bavarian cream which is mixed with a strawberry mousse. The mousse captures the bright sweetness of fresh berries while maintaining a refreshing, cloud‑like texture. As the cake sets, the ladyfingers gently absorb the fruit essence, becoming tender without losing their structure. With no heavy frosting or elaborate decoration, the Charlotte highlights the purity of its ingredients, offering a clean, elegant flavor that feels both nostalgic and refined. Each slice reveals a graceful contrast between the pale biscuit exterior and the rosy mousse within, making it a dessert that feels celebratory yet effortlessly delicate.", ingredients:"flour, eggs, milk, vanilla, heavy cream, sugar, strawberries, and gelatine.", diameter: "10 inches.", servingsize:"15-20 people.", price:"$100", id:"strawberry-charlotte-cake" },
+  ],
+
+  "The Fairytale Cake": [
+    { img:"https://i.imgur.com/LBeJQOj.jpeg", desc:"The Fairytale cake is made up of soft, moist sponge layers that are generously coated in custard cream, creating a tender base that feels both comforting and luxurious. Alternating layers of mixed berry jam add a bright, fruity contrast, as their sweet‑tart flavor soakes gently into the sponge while the cake rests. The custard lends a smooth richness that balances the liveliness of the berries, allowing each bite to feel harmonious and delicately sweet. With no heavy decorations or elaborate fillings, the cake highlights the purity of its components, offering a nostalgic charm that feels timeless and refined. When sliced, every piece reveals a beautiful interplay of pale sponge, creamy custard, and jewel‑toned jam, making it a dessert that feels magical in its simplicity.", ingredients:"flour, eggs, milk, vanilla, sugar, mixed berry jam.", diameter: "10 inches.", servingsize:"12-15 people.", price:"$100", id:"the-fairytale-cake" },
+    { img:"https://i.imgur.com/qPLQ4Fu.png", desc:"The Fairytale cake is made up of soft, moist sponge layers that are generously coated in custard cream, creating a tender base that feels both comforting and luxurious. Alternating layers of mixed berry jam add a bright, fruity contrast, as their sweet‑tart flavor soakes gently into the sponge while the cake rests. The custard lends a smooth richness that balances the liveliness of the berries, allowing each bite to feel harmonious and delicately sweet. With no heavy decorations or elaborate fillings, the cake highlights the purity of its components, offering a nostalgic charm that feels timeless and refined. When sliced, every piece reveals a beautiful interplay of pale sponge, creamy custard, and jewel‑toned jam, making it a dessert that feels magical in its simplicity.", ingredients:"flour, eggs, milk, vanilla, sugar, mixed berry jam.", diameter: "10 inches.", servingsize:"12-15 people.", price:"$100", id:"the-fairytale-cake" },
+  ],
+
+  "Drunken Cherry Cake": [
+    { img:"https://i.imgur.com/rfLUhEQ.png", desc:"The Drunken Cherry cake is imbued with tart cherries soaked in cognac, allowing the cake to develop a deep, aromatic sweetness. Inside a smooth cream filling embraces pieces of tender, cognac‑infused cherries which creates a balance of richness and bright fruit flavor. As the cake rests, the cherries release their juices into the cake, giving every bite a harmonious blend of tartness and warmth. With no heavy decorations or elaborate toppings, the cake highlights the natural beauty of its ingredients, offering a nostalgic charm that feels both indulgent and refined. When sliced, each piece reveals a striking contrast creamy filling, and ruby‑toned cherries, making it a dessert that feels celebratory, comforting, and irresistibly inviting.", ingredients:"flour, eggs, sugar, butter, condensed milk, cocoa powder, sour cherries, cognac.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"drunken-cherry-cake" },
+    { img:"https://i.imgur.com/QuIdpUl.png", desc:"The Drunken Cherry cake is imbued with tart cherries soaked in cognac, allowing the cake to develop a deep, aromatic sweetness. Inside a smooth cream filling embraces pieces of tender, cognac‑infused cherries which creates a balance of richness and bright fruit flavor. As the cake rests, the cherries release their juices into the cake, giving every bite a harmonious blend of tartness and warmth. With no heavy decorations or elaborate toppings, the cake highlights the natural beauty of its ingredients, offering a nostalgic charm that feels both indulgent and refined. When sliced, each piece reveals a striking contrast creamy filling, and ruby‑toned cherries, making it a dessert that feels celebratory, comforting, and irresistibly inviting.", ingredients:"flour, eggs, sugar, butter, condensed milk, cocoa powder, sour cherries, cognac.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"drunken-cherry-cake" },
+  ],
+
+  "Cream Puffs": [
+    { img:"https://i.imgur.com/Et4QqLT.jpeg", displayName: "Creampuffs with Custard Filling", desc:"Cream puffs are made from delicate choux pastry that bakes into light, hollow shells with a crisp golden exterior and a tender, airy interior. Once cooled, each shell is filled with smooth, velvety custard or whipped cream that adds a gentle sweetness and a luxurious softness to every bite. As the pastry rests, the cream settles into the folds of the shell, creating a perfect balance between crisp and creamy textures. When served, each puff reveals its simple beauty—golden pastry, pale cream, and a cloud‑like lightness that makes them irresistible in their simplicity.", ingredients:"flour, eggs, sugar, butter, milk (Can be ordered with either custard or whipped cream)", diameter: "", servingsize:"Comes in a pack of 10.", price:"$30", id:"cream-puffs-with-custard-filling" },
+    { img:"https://i.imgur.com/Et4QqLT.jpeg", displayName: "Creampuffs with Whipped Cream Filling", desc:"Cream puffs are made from delicate choux pastry that bakes into light, hollow shells with a crisp golden exterior and a tender, airy interior. Once cooled, each shell is filled with smooth, velvety custard or whipped cream that adds a gentle sweetness and a luxurious softness to every bite. As the pastry rests, the cream settles into the folds of the shell, creating a perfect balance between crisp and creamy textures. When served, each puff reveals its simple beauty—golden pastry, pale cream, and a cloud‑like lightness that makes them irresistible in their simplicity.", ingredients:"flour, eggs, sugar, butter, milk (Can be ordered with either custard or whipped cream)", diameter: "", servingsize:"Comes in a pack of 10.", price:"$30", id:"cream-puffs-with-whipped-cream-filling" },
+  ],
+
+  "Kartoshka": [
+    { img:"https://i.imgur.com/hRNJpo3.jpeg", displayName: "Kartoshka", desc:"Kartoshka is a pastry known for its rich, truffle-like texture and playful shape that resembles a small potato. Traditionally made from crumbled sponge cake or biscuit mixed with sweetened condensed milk, butter, and cocoa, the mixture is rolled into compact logs or ovals and coated in chocolate glaze. Each piece is often topped with a few pistachios or nuts for contrast and elegance. Despite its humble origins, kartoshka delivers a deeply satisfying bite: dense, chocolaty, and smooth, with a hint of crunch from the garnish. It’s a beloved treat that blends simplicity with indulgence, perfect for tea time or a sweet finish to any meal.", ingredients:"flour, eggs, sugar, butter, milk, condensed milk, cocoa powder, cognac.", diameter: "", servingsize:"Comes in a pack of 10.", price:"$45", id:"kartoshka" },
+    { img:"https://i.imgur.com/Jvyfkmj.jpeg", displayName: "Kartoshka", desc:"Kartoshka is a pastry known for its rich, truffle-like texture and playful shape that resembles a small potato. Traditionally made from crumbled sponge cake or biscuit mixed with sweetened condensed milk, butter, and cocoa, the mixture is rolled into compact logs or ovals and coated in chocolate glaze. Each piece is often topped with a few pistachios or nuts for contrast and elegance. Despite its humble origins, kartoshka delivers a deeply satisfying bite: dense, chocolaty, and smooth, with a hint of crunch from the garnish. It’s a beloved treat that blends simplicity with indulgence, perfect for tea time or a sweet finish to any meal.", ingredients:"flour, eggs, sugar, butter, milk, condensed milk, cocoa powder, cognac.", diameter: "", servingsize:"Comes in a pack of 10.", price:"$45", id:"kartoshka" },
+  ],
+
+  "Polar Bear Cake": [
+    { img:"https://i.imgur.com/crPL5IR.jpeg", displayName: "Polar Bear Cake", desc:"The Polar Bear Cake is a rich vanilla and chocolate layered cake with a chocolaty gold finish. Tender cocoa sponge made from flour, butter, sugar, and sour cream creates a moist, velvety crumb with a gentle tang that deepens the chocolate flavor. The vanilla layer is light and delicate with a soft, plush crumb, offering a mellow sweetness and a subtle warmth that balances richness with an airy, melt-in-your-mouth finish. Each layer is generously filled with a whipped mascarpone and heavy cream frosting, lightly sweetened with powdered sugar for a soft, cloudlike texture that melts on the tongue. A silky chocolate element weaves through the cake, adding depth and a subtly sweet flavor. As it rests, the cream filling settles into the sponge, keeping every bite luscious without feeling heavy. Cloaked in a pale swirl of mascarpone frosting and finished with delicate chocolate accents, the cake evokes the quiet elegance of fresh snowfall - simple, refined, and irresistibly comforting with every slice.", ingredients:"flour, sour cream, sugar, butter, cocoa powder, heavy cream, mascarpone, powdered sugar, chocolate.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"polar-bear-cake" },
+    { img:"https://i.imgur.com/uXQxoQZ.jpg", displayName: "Polar Bear Cake", desc:"The Polar Bear Cake is a rich vanilla and chocolate layered cake with a chocolaty gold finish. Tender cocoa sponge made from flour, butter, sugar, and sour cream creates a moist, velvety crumb with a gentle tang that deepens the chocolate flavor. The vanilla layer is light and delicate with a soft, plush crumb, offering a mellow sweetness and a subtle warmth that balances richness with an airy, melt-in-your-mouth finish. Each layer is generously filled with a whipped mascarpone and heavy cream frosting, lightly sweetened with powdered sugar for a soft, cloudlike texture that melts on the tongue. A silky chocolate element weaves through the cake, adding depth and a subtly sweet flavor. As it rests, the cream filling settles into the sponge, keeping every bite luscious without feeling heavy. Cloaked in a pale swirl of mascarpone frosting and finished with delicate chocolate accents, the cake evokes the quiet elegance of fresh snowfall - simple, refined, and irresistibly comforting with every slice.", ingredients:"flour, sour cream, sugar, butter, cocoa powder, heavy cream, mascarpone, powdered sugar, chocolate.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"polar-bear-cake" },
+    { img:"https://i.imgur.com/WTPKg2K.jpeg", displayName: "Polar Bear Cake", desc:"The Polar Bear Cake is a rich vanilla and chocolate layered cake with a chocolaty gold finish. Tender cocoa sponge made from flour, butter, sugar, and sour cream creates a moist, velvety crumb with a gentle tang that deepens the chocolate flavor. The vanilla layer is light and delicate with a soft, plush crumb, offering a mellow sweetness and a subtle warmth that balances richness with an airy, melt-in-your-mouth finish. Each layer is generously filled with a whipped mascarpone and heavy cream frosting, lightly sweetened with powdered sugar for a soft, cloudlike texture that melts on the tongue. A silky chocolate element weaves through the cake, adding depth and a subtly sweet flavor. As it rests, the cream filling settles into the sponge, keeping every bite luscious without feeling heavy. Cloaked in a pale swirl of mascarpone frosting and finished with delicate chocolate accents, the cake evokes the quiet elegance of fresh snowfall - simple, refined, and irresistibly comforting with every slice.", ingredients:"flour, sour cream, sugar, butter, cocoa powder, heavy cream, mascarpone, powdered sugar, chocolate.", diameter: "10 inches.", servingsize:"10-15 people.", price:"$100", id:"polar-bear-cake" },
+  ],
+
+    "Baklava": [
+    { img:"https://i.imgur.com/JMtJu2p.jpeg", displayName: "Baklava", desc:"Baklava is a delicate, honey‑soaked pastry built from dozens of crisp, buttery phyllo layers. Inside, a warm blend of finely chopped walnuts and pistachios adds gentle richness, lifted by a hint of cinnamon. Once baked to a golden crackle, the pastry is drenched in a fragrant honey‑citrus syrup that seeps into the layers, giving each bite a bright, aromatic sweetness. The top stays lightly crisp while the center becomes tender and nutty, creating a beautiful contrast in texture. Finished with a sprinkle of crushed pistachios, baklava feels both timeless and indulgent—simple, fragrant, and irresistibly satisfying.", ingredients:"Phyllo dough, melted butter, walnuts, pistachios, sugar, cinnamon, honey, water, lemon juice, and a touch of orange zest.", diameter: "", servingsize:"Comes in a pack of 10.", price:"$40", id:"baklava" },
+     { img:"https://i.imgur.com/HQ3AzpV.jpeg", displayName: "Baklava", desc:"Baklava is a delicate, honey‑soaked pastry built from dozens of crisp, buttery phyllo layers. Inside, a warm blend of finely chopped walnuts and pistachios adds gentle richness, lifted by a hint of cinnamon. Once baked to a golden crackle, the pastry is drenched in a fragrant honey‑citrus syrup that seeps into the layers, giving each bite a bright, aromatic sweetness. The top stays lightly crisp while the center becomes tender and nutty, creating a beautiful contrast in texture. Finished with a sprinkle of crushed pistachios, baklava feels both timeless and indulgent—simple, fragrant, and irresistibly satisfying.", ingredients:"Phyllo dough, melted butter, walnuts, pistachios, sugar, cinnamon, honey, water, lemon juice, and a touch of orange zest.", diameter: "", servingsize:"Comes in a pack of 10.", price:"$40", id:"baklava" },
+  ],
+
+  "Zefir": [
+    { img:"https://i.imgur.com/oH0POqa.jpeg", displayName: "Zefir", desc:"Zefir is a light, fruit‑whipped confection with a soft, cloudlike texture and a gentle natural sweetness. Made from puréed apples or berries blended with sugar and whipped egg whites, it’s piped into airy spirals that set into a delicate shell. The outside stays lightly firm while the inside remains tender and melt‑soft, offering a clean, bright flavor with a subtle tang. Finished with a dusting of powdered sugar, Zefir feels simple, elegant, and effortlessly comforting.", ingredients:"Egg whites, sugar syrup, and berries.", diameter: "", servingsize:"Comes in a pack of 12.", price:"$10", id:"zefir" },
+     { img:"https://i.imgur.com/XnAHD56.jpeg", displayName: "Zefir", desc:"Zefir is a light, fruit‑whipped confection with a soft, cloudlike texture and a gentle natural sweetness. Made from puréed apples or berries blended with sugar and whipped egg whites, it’s piped into airy spirals that set into a delicate shell. The outside stays lightly firm while the inside remains tender and melt‑soft, offering a clean, bright flavor with a subtle tang. Finished with a dusting of powdered sugar, Zefir feels simple, elegant, and effortlessly comforting..", ingredients:"Egg whites, sugar syrup, and berries.", diameter: "", servingsize:"Comes in a pack of 12.", price:"$10", id:"zefir" },
+  ]
+  /* Add similar arrays for other cakes as needed... */
+};
+
+/* 🎂 Build ribbon */
+function createCakeElements(track) {
+  cakes.forEach(cake => {
+    const item = document.createElement("div");
+    item.className = "cake-item";
+
+    const img = document.createElement("img");
+    img.src = cake.img;
+    img.alt = cake.name;
+
+    // Lazy load only on desktop
+    if (window.innerWidth > 640) img.loading = "lazy";
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "tooltip";
+    tooltip.textContent = cake.name;
+
+    item.appendChild(img);
+    item.appendChild(tooltip);
+    track.appendChild(item);
+
+    item.addEventListener("click", () => openModal(cake), { passive:true });
+  });
+}
+
+/* 🔁 Init ribbon safely */
+const ribbonTrack = document.getElementById("ribbonTrack");
+createCakeElements(ribbonTrack);
+
+const clone = ribbonTrack.cloneNode(true);
+ribbonTrack.parentNode.appendChild(clone);
+
+clone.querySelectorAll(".cake-item").forEach((item, i) => {
+  const cake = cakes[i % cakes.length];
+  item.addEventListener("click", () => openModal(cake), { passive:true });
+});
+
+// 📌 Mobile preloading for smooth ribbon
+function preloadRibbonImages() {
+  if (window.innerWidth <= 640) {
+    const imgs = document.querySelectorAll(".ribbon-track img");
+    imgs.forEach(img => {
+      const tmp = new Image();
+      tmp.src = img.src;
+    });
+  }
+}
+
+window.addEventListener("load", preloadRibbonImages);
+
+/* 📦 Modal refs */
+const modal = document.getElementById("myModal");
+const closeModalBtn = document.getElementById("closeModal");
+const galleryImg = document.getElementById("galleryImg");
+const modalTitle = document.getElementById("modalTitle");
+const modalDesc = document.getElementById("modalDesc");
+const modalIngredients = document.getElementById("modalIngredients");
+const modalDiameter = document.getElementById("modalDiameter");
+const modalServingsize = document.getElementById("modalServingsize");
+const modalPrice = document.getElementById("modalPrice");
+const addToCartBtn = document.getElementById("addToCartBtn");
+const addedMessage = document.getElementById("addedMessage");
+
+let currentGallery = [];
+let currentIndex = 0;
+let currentCakeName = "";
+
+/* 🧠 Variation display name */
+function getVariationDisplayName(baseName, v) {
+  if (v.label) return v.label;
+  if (v.id) {
+    const baseId = baseName.toLowerCase().replace(/\s+/g,'-');
+    if (v.id !== baseId) {
+      return v.id.split('-').map(w => w[0].toUpperCase()+w.slice(1)).join(' ');
+    }
+  }
+  return baseName;
+}
+
+/* 🚪 Open modal */
+function openModal(cake) {
+  document.querySelectorAll(".ribbon-track").forEach(t => {
+    t.style.animationPlayState = "paused";
+  });
+
+  document.body.style.overflow = "hidden";
+  modal.style.display = "flex";
+
+  currentCakeName = cake.name;
+
+  if (galleriesByCakeName[cake.name]?.length) {
+    currentGallery = galleriesByCakeName[cake.name];
+  } else {
+    currentGallery = [cake];
+  }
+
+  currentIndex = 0;
+  preloadGallery();
+  showVariation();
+}
+
+/* 🖼️ Preload images (mobile smoothness) */
+function preloadGallery() {
+  currentGallery.forEach(v => {
+    const img = new Image();
+    img.src = v.img;
+  });
+}
+
+/* 🔄 Show variation */
+function showVariation() {
+  const v = currentGallery[currentIndex];
+
+  const diameterRow = modalDiameter.parentElement;
+  diameterRow.style.display = v.diameter ? "block" : "none";
+
+  galleryImg.src = v.img;
+  galleryImg.alt = currentCakeName + " variation";
+
+  modalTitle.textContent = v.displayName || currentCakeName;
+  modalDesc.textContent = v.desc;
+  modalIngredients.textContent = v.ingredients;
+  modalDiameter.textContent = v.diameter;
+  modalServingsize.textContent = v.servingsize;
+  modalPrice.textContent = v.price;
+
+  const displayName = getVariationDisplayName(currentCakeName, v);
+
+  addToCartBtn.textContent = `Add ${displayName} (${v.price})`;
+
+  addToCartBtn.onclick = () => {
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+    const item = {
+      id: v.id || `${currentCakeName}-${currentIndex}`,
+      name: displayName,
+      price: Number(String(v.price).replace(/[^0-9.]/g,'')),
+      qty: 1
+    };
+
+    const i = cart.findIndex(x => x.id === item.id);
+    if (i >= 0) cart[i].qty++;
+    else cart.push(item);
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    addedMessage.textContent = "Added";
+    addedMessage.style.display = "inline";
+    setTimeout(()=>addedMessage.style.display="none",1500);
+  };
+}
+
+/* ⬅️➡️ Buttons */
+document.querySelector(".gallery-prev").onclick = () => {
+  if (!currentGallery.length) return;
+  currentIndex = (currentIndex - 1 + currentGallery.length) % currentGallery.length;
+  showVariation();
+};
+
+document.querySelector(".gallery-next").onclick = () => {
+  if (!currentGallery.length) return;
+  currentIndex = (currentIndex + 1) % currentGallery.length;
+  showVariation();
+};
+
+/* 👉 Swipe support (mobile) */
+let touchStartX = 0;
+
+galleryImg.addEventListener("touchstart", e=>{
+  touchStartX = e.changedTouches[0].clientX;
+},{passive:true});
+
+galleryImg.addEventListener("touchend", e=>{
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 40) {
+    if (dx < 0) document.querySelector(".gallery-next").onclick();
+    else document.querySelector(".gallery-prev").onclick();
+  }
+},{passive:true});
+
+/* ❌ Close */
+closeModalBtn.onclick = closeModal;
+
+function closeModal() {
+  modal.style.display = "none";
+  document.body.style.overflow = "";
+  document.querySelectorAll(".ribbon-track").forEach(t=>{
+    t.style.animationPlayState = "running";
+  });
+}
+
+/* ESC */
+document.addEventListener("keydown", e=>{
+  if (e.key==="Escape" && modal.style.display==="flex") closeModal();
+});
+
+/* Init hidden */
+document.addEventListener("DOMContentLoaded", ()=>{
+  modal.style.display = "none";
+});
+</script>
 
   </section>
 
