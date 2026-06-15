@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Sweet Mishpuchah — Cakes & Pastries</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Lato:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    font-family:'Lato',system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:#0f0b07;
+    color:#f9f5ee;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a { color:inherit; text-decoration:none; }
+
+  .page {
+    max-width:1100px;
+    margin:0 auto;
+    padding:14px 14px 40px;
+  }
+
+  .top-bar {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:6px 4px 10px;
+  }
+
+  .brand {
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+
+  .brand-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.25rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+
+  .brand-sub {
+    font-size:0.8rem;
+    opacity:0.8;
+  }
+
+  .top-cta {
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+
+  .pill {
+    border-radius:999px;
+    border:1px solid rgba(250,250,250,0.18);
+    padding:6px 10px;
+    font-size:0.78rem;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:rgba(15,11,7,0.7);
+  }
+
+  .pill-dot {
+    width:7px;
+    height:7px;
+    border-radius:999px;
+    background:#22c55e;
+    box-shadow:0 0 8px rgba(34,197,94,0.9);
+  }
+
+  .btn-primary {
+    border:none;
+    border-radius:999px;
+    padding:7px 14px;
+    font-size:0.82rem;
+    font-weight:500;
+    cursor:pointer;
+    background:linear-gradient(135deg,#facc6b,#eab308);
+    color:#1a1208;
+    box-shadow:0 6px 18px rgba(234,179,8,0.35);
+    white-space:nowrap;
+  }
+
+  .btn-primary:active {
+    transform:translateY(1px);
+    box-shadow:0 3px 10px rgba(234,179,8,0.35);
+  }
+
+  .btn-ghost {
+    border-radius:999px;
+    border:1px solid rgba(249,245,238,0.22);
+    padding:7px 13px;
+    font-size:0.8rem;
+    background:rgba(15,11,7,0.7);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+  }
+
+  .hero {
+    margin-top:10px;
+    padding:18px 14px 18px;
+    border-radius:18px;
+    background:
+      radial-gradient(circle at top,#3b2412 0,transparent 55%),
+      linear-gradient(160deg,#1b120a 0%,#0b0704 100%);
+    border:1px solid rgba(250,250,250,0.06);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .hero-inner { position:relative; z-index:1; }
+
+  .hero-kicker {
+    font-size:0.78rem;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:rgba(252,211,77,0.9);
+    margin-bottom:6px;
+  }
+
+  .hero-title {
+    font-family:'Playfair Display',serif;
+    font-size:clamp(1.5rem,4.4vw,2.1rem);
+    line-height:1.25;
+    margin-bottom:8px;
+  }
+
+  .hero-sub {
+    font-size:0.9rem;
+    color:rgba(249,245,238,0.82);
+    line-height:1.7;
+    max-width:34rem;
+  }
+
+  .hero-actions {
+    margin-top:14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+  }
+
+  .hero-note {
+    margin-top:10px;
+    font-size:0.78rem;
+    color:rgba(249,245,238,0.7);
+  }
+
+  .section {
+    margin-top:22px;
+    border-radius:16px;
+    padding:16px 14px 18px;
+    background:linear-gradient(145deg,#18100a 0%,#1f150d 40%,#fdf7ee 100%);
+    color:#1b120a;
+  }
+
+  .section.dark {
+    background:linear-gradient(160deg,#1b120a 0%,#0b0704 100%);
+    color:#f9f5ee;
+  }
+
+  .section-title {
+    font-family:'Playfair Display',serif;
+    font-size:1.05rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#b8860b;
+    margin-bottom:10px;
+  }
+
+  .section.dark .section-title {
+    color:#facc6b;
+  }
+
+  .section-sub {
+    font-size:0.86rem;
+    color:rgba(27,18,10,0.78);
+    margin-bottom:10px;
+  }
+
+  .section.dark .section-sub {
+    color:rgba(249,245,238,0.78);
+  }
+
+  .footer {
+    margin-top:26px;
+    padding-top:14px;
+    border-top:1px solid rgba(148,124,92,0.4);
+    font-size:0.78rem;
+    color:rgba(249,245,238,0.7);
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:space-between;
+  }
+
+  .footer a {
+    text-decoration:underline;
+    text-decoration-thickness:1px;
+    text-underline-offset:3px;
+  }
+
+  @media (max-width:640px) {
+    .page { padding-inline:10px; }
+    .hero { padding-inline:14px; }
+    .section { padding-inline:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="top-bar">
+    <div class="brand">
+      <div class="brand-title">The Sweet Mishpuchah</div>
+      <div class="brand-sub">European‑style cakes & pastries, baked to order in Brooklyn</div>
+    </div>
+    <div class="top-cta">
+      <div class="pill">
+        <span class="pill-dot"></span>
+        <span>Taking orders this week</span>
+      </div>
+      <button class="btn-primary" onclick="goToCheckout()">Order now</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-kicker">Small‑batch • Made to order</div>
+      <h1 class="hero-title">
+        Layered honey cakes, meringue tortes, roulades, and pastries—crafted like home, finished like a boutique.
+      </h1>
+      <p class="hero-sub">
+        Swipe through our cakes, tap to explore variations, then place your order with a simple mobile‑friendly checkout.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="scrollToRibbon()">Browse cakes</button>
+        <button class="btn-ghost" onclick="goToCheckout()">Skip to checkout</button>
+      </div>
+      <div class="hero-note">
+        Offline payments accepted via Zelle, Venmo, Cash App, or cash at pickup in Brooklyn, NY.
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMO SECTION (A1: under hero) -->
+  <section class="section dark" id="promo-section">
+    <h2 class="section-title">Special promotion</h2>
+    <p class="section-sub">
+      In celebration of our opening, enjoy a complimentary pastry gift with every order.
+    </p>
+
+    <!-- Promo banner fully inlined -->
+    <div class="promo-wrapper">
+      <div class="promo-card">
+        <div class="promo-inner">
+
+          <div class="sparkles" id="sparkles"></div>
+
+          <div class="deco-rule">
+            <span></span>
+            <div class="deco-diamond"></div>
+            <span></span>
+          </div>
+
+          <div class="promo-title" id="promo-title">
+            Attention Special Promotion:
+          </div>
+
+          <div class="promo-body" id="promo-body">
+            <span class="promo-line" id="line1">In celebration of our grand opening we are offering a special promotion!</span>
+            <span class="promo-line" id="line2">We are providing a free gift of our delicious pastries with every order!</span>
+          </div>
+
+          <div class="deco-rule deco-rule-bottom">
+            <span></span>
+            <div class="deco-diamond"></div>
+            <span></span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- RIBBON SECTION (C1: high on page) -->
+  <section class="section" id="ribbon-section">
+    <h2 class="section-title">Signature cakes & pastries</h2>
+    <p class="section-sub">
+      Swipe through the ribbon, tap any cake to see photos, ingredients, sizes, and price, then add it to your cart.
+    </p>
+
+    <!-- 🔻 Inline your full Ribbon Mobile (Parts 1–9) here -->
+    <!-- Take everything between <body>...</body> from your ribbon file and paste it here. -->
+    <!-- That includes its <style> and <script> blocks. -->
+
+  </section>
+
+  <section class="section dark">
+    <h2 class="section-title">Ready to place your order?</h2>
+    <p class="section-sub">
+      Your cart is saved on this device. When you continue to checkout, your selected cakes and pastries will be ready.
+    </p>
+    <button class="btn-primary" onclick="goToCheckout()">Continue to checkout</button>
+  </section>
+
+  <footer class="footer">
+    <div>Pickup: 2404 East 28th Street, Brooklyn, NY 11235</div>
+    <div>
+      Questions? Email
+      <a href="mailto:thesweetmishpuchah@gmail.com">thesweetmishpuchah@gmail.com</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  function scrollToRibbon() {
+    document.getElementById('ribbon-section').scrollIntoView({ behavior:'smooth' });
+  }
+  function goToCheckout() {
+    window.location.href = 'checkout.html';
+  }
+
+  // Promo text + sparkles (from your promo banner)
+  const TITLE = "Attention Special Promotion:";
+  const LINE1  = "In celebration of our grand opening we are offering a special promotion!";
+  const LINE2  = "We are providing a free gift of our delicious pastries with every order!";
+
+  document.getElementById('promo-title').textContent = TITLE;
+  document.getElementById('line1').textContent        = LINE1;
+  document.getElementById('line2').textContent        = LINE2;
+
+  const sparklesEl = document.getElementById('sparkles');
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'sparkle';
+    const x = Math.random() * 100;
+    const tx = (Math.random() - 0.5) * 60;
+    const ty = -(30 + Math.random() * 60);
+    el.style.cssText = `
+      left: ${x}%;
+      bottom: ${Math.random() * 40}%;
+      --tx: ${tx}px;
+      --ty: ${ty}px;
+      --dur: ${2.8 + Math.random() * 3.2}s;
+      --delay: ${Math.random() * 5}s;
+      width: ${2 + Math.random() * 3}px;
+      height: ${2 + Math.random() * 3}px;
+    `;
+    sparklesEl.appendChild(el);
+  }
+</script>
+
+</body>
+</html>
